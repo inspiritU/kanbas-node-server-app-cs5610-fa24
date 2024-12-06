@@ -14,7 +14,7 @@ import EnrollmentsRoutes from "./Kanbas/Enrollments/routes.js";
 console.log("Environment Variables:", process.env.MONGO_CONNECTION_STRING);
 
 const CONNECTION_STRING =
-    process.env.MONGO_CONNECTION_STRING || "mongodb+srv://caoxian:Dr.cx2024@kabas.prm0g.mongodb.net/?retryWrites=true&w=majority&appName=Kabas";
+    process.env.MONGO_CONNECTION_STRING || "mongodb+srv://Cluster54864:V3RZeFl+YkVn@cluster54864.5jmkk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster54864";
 mongoose.connect(CONNECTION_STRING);
 
 const app = express();
