@@ -1,26 +1,44 @@
 import express from "express";
+import mongoose from "mongoose";
 import "dotenv/config";
-import Hello from "./Hello.js";
+import HelloRoutes from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
-import CourseRoutes from "./Kanbas/Courses/routes.js";
-import cors from "cors";
 import UserRoutes from "./Kanbas/Users/routes.js";
-import session from "express-session";
+import CourseRoutes from "./Kanbas/Courses/routes.js";
 import ModuleRoutes from "./Kanbas/Modules/routes.js";
-import EnrollmentRoutes from "./Kanbas/Enrollments/routes.js";
 import AssignmentRoutes from "./Kanbas/Assignments/routes.js";
+import cors from "cors";
+import session from "express-session";
+import EnrollmentsRoutes from "./Kanbas/Enrollments/routes.js";
+
+console.log("Environment Variables:", process.env.MONGO_CONNECTION_STRING);
+
+const CONNECTION_STRING =
+    process.env.MONGO_CONNECTION_STRING || "mongodb+srv://caoxian:Dr.cx2024@kabas.prm0g.mongodb.net/?retryWrites=true&w=majority&appName=Kabas";
+mongoose.connect(CONNECTION_STRING);
 
 const app = express();
 
-// CORS 配置
 app.use(
     cors({
         credentials: true,
-        origin: process.env.NETLIFY_URL || "http://localhost:3000", // 确保环境变量设置正确
+        origin: function (origin, callback) {
+            const allowedOrigins = [
+                process.env.NETLIFY_URL,
+                "http://localhost:3000",
+
+            ];
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
     })
 );
 
-// Session 配置
+
+
 const sessionOptions = {
     secret: process.env.SESSION_SECRET || "kanbas",
     resave: false,
@@ -31,31 +49,19 @@ if (process.env.NODE_ENV !== "development") {
     sessionOptions.cookie = {
         sameSite: "none",
         secure: true,
-        domain: process.env.NODE_SERVER_DOMAIN, // 确保环境变量设置正确
+        domain: process.env.NODE_SERVER_DOMAIN,
     };
 }
 app.use(session(sessionOptions));
 
-// JSON 解析
 app.use(express.json());
 
-// 路由
-Hello(app);
 Lab5(app);
+HelloRoutes(app);
 UserRoutes(app);
 CourseRoutes(app);
-EnrollmentRoutes(app);
-AssignmentRoutes(app);
 ModuleRoutes(app);
+AssignmentRoutes(app);
+EnrollmentsRoutes(app);
 
-// 默认错误处理
-app.use((err, req, res, next) => {
-    console.error("Error:", err.message);
-    res.status(err.status || 500).json({ error: err.message });
-});
-
-// 监听端口
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.listen(process.env.PORT || 4000);
